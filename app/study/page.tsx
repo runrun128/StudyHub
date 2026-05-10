@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type Session = {
   id: string;
@@ -14,48 +15,68 @@ export default function StudyPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [subject, setSubject] = useState(subjects[0]);
   const [minutes, setMinutes] = useState(30);
+  const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    const data = localStorage.getItem("study");
-    if (data) setSessions(JSON.parse(data));
-  }, []);
+  const fetchSessions = async () => {
+    const { data, error } = await supabase
+      .from("study_sessions")
+      .select("id, subject, minutes")
+      .order("created_at", { ascending: false });
 
-  const save = (data: Session[]) => {
-    setSessions(data);
-    localStorage.setItem("study", JSON.stringify(data));
+    if (!error && data) {
+      setSessions(data);
+    }
   };
 
-  const add = () => {
-    const newSession: Session = {
-      id: Date.now().toString(),
+  useEffect(() => {
+    fetchSessions();
+  }, []);
+
+  const add = async () => {
+    setMessage("");
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setMessage("ログインしてください。");
+      return;
+    }
+
+    const { error } = await supabase.from("study_sessions").insert({
+      user_id: user.id,
       subject,
       minutes,
-    };
+    });
 
-    save([...sessions, newSession]);
+    if (error) {
+      setMessage("保存に失敗しました: " + error.message);
+      return;
+    }
+
+    setMessage("保存しました！🎉");
+    fetchSessions();
   };
 
   const total = sessions.reduce((a, b) => a + b.minutes, 0);
 
   return (
     <div style={{ maxWidth: 700 }}>
-
       <h1 style={{ fontSize: 28, marginBottom: 20 }}>📚 Study Dashboard</h1>
 
-      {/* 入力カード */}
       <div style={card}>
-
-        {/* 教科選択 */}
         <div>
           <p>教科</p>
           <select value={subject} onChange={(e) => setSubject(e.target.value)}>
             {subjects.map((s) => (
-              <option key={s}>{s}</option>
+              <option key={s} value={s}>
+                {s}
+              </option>
             ))}
           </select>
         </div>
 
-        {/* ダイヤル（スライダー） */}
         <div style={{ marginTop: 20 }}>
           <p>時間: {minutes}分</p>
           <input
@@ -73,14 +94,17 @@ export default function StudyPage() {
           追加
         </button>
 
+        {message && (
+          <p style={{ marginTop: 12, opacity: 0.8 }}>
+            {message}
+          </p>
+        )}
       </div>
 
-      {/* 合計 */}
       <div style={card}>
         <h2>合計: {total}分</h2>
       </div>
 
-      {/* リスト */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {sessions.map((s) => (
           <div key={s.id} style={item}>
@@ -88,7 +112,6 @@ export default function StudyPage() {
           </div>
         ))}
       </div>
-
     </div>
   );
 }
@@ -114,4 +137,5 @@ const btn = {
   background: "#3b82f6",
   color: "white",
   border: "none",
+  cursor: "pointer",
 };

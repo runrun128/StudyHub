@@ -3,23 +3,40 @@
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const router = useRouter();
   const [todayTotal, setTodayTotal] = useState(0);
 
   useEffect(() => {
-    const data = localStorage.getItem("study");
-    if (!data) return;
+    const fetchTodayTotal = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    const sessions = JSON.parse(data);
+      if (!user) return;
 
-    const total = sessions.reduce(
-      (sum: number, s: any) => sum + s.minutes,
-      0
-    );
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
 
-    setTodayTotal(total);
+      const { data, error } = await supabase
+        .from("study_sessions")
+        .select("minutes")
+        .gte("created_at", start.toISOString());
+
+      if (error || !data) return;
+
+      const total = data.reduce(
+        (sum: number, session: { minutes: number }) =>
+          sum + session.minutes,
+        0
+      );
+
+      setTodayTotal(total);
+    };
+
+    fetchTodayTotal();
   }, []);
 
   const items = [

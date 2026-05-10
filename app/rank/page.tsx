@@ -1,87 +1,83 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
-type UserRank = {
-  name: string;
-  total: number;
+type RankItem = {
+  user_id: string;
+  total_minutes: number;
 };
 
 export default function RankPage() {
-  const [data, setData] = useState<UserRank[]>([]);
+  const [data, setData] = useState<RankItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const mock: UserRank[] = [
-      { name: "You", total: 320 },
-      { name: "Taro", total: 280 },
-      { name: "Hanako", total: 250 },
-      { name: "Ken", total: 180 },
-    ];
+    const fetchRank = async () => {
+      const { data, error } = await supabase
+        .from("study_sessions")
+        .select("user_id, minutes");
 
-    mock.sort((a, b) => b.total - a.total);
-    setData(mock);
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      // 集計（フロントでOK・まずはこれで十分）
+      const map: Record<string, number> = {};
+
+      data.forEach((row) => {
+        map[row.user_id] = (map[row.user_id] || 0) + row.minutes;
+      });
+
+      const result: RankItem[] = Object.entries(map)
+        .map(([user_id, total_minutes]) => ({
+          user_id,
+          total_minutes,
+        }))
+        .sort((a, b) => b.total_minutes - a.total_minutes);
+
+      setData(result);
+      setLoading(false);
+    };
+
+    fetchRank();
   }, []);
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      <h1 style={{ fontSize: 28, marginBottom: 20 }}>🏆 Ranking</h1>
+    <div>
+      <h1 style={{ fontSize: 28, marginBottom: 20 }}>🏆 ランキング</h1>
 
-      <div style={list}>
-        {data.map((u, i) => (
-          <div key={i} style={item}>
-            
-            {/* 左：順位 */}
-            <div style={left}>
-              <span style={rank}>
-                {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
-              </span>
+      {loading ? (
+        <p>読み込み中...</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {data.map((item, index) => (
+            <div key={item.user_id} style={card}>
+              <div style={{ fontSize: 18 }}>
+                #{index + 1}
+              </div>
 
-              <span style={name}>{u.name}</span>
+              <div>
+                ユーザー: {item.user_id.slice(0, 8)}...
+              </div>
+
+              <div style={{ fontSize: 20, fontWeight: "bold" }}>
+                {item.total_minutes} min
+              </div>
             </div>
-
-            {/* 右：時間 */}
-            <div style={time}>
-              {u.total} min
-            </div>
-
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-const list = {
-  display: "flex",
-  flexDirection: "column" as const,
-  gap: 12,
-};
-
-const item = {
+const card = {
+  background: "#111827",
+  padding: 16,
+  borderRadius: 12,
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: 16,
-  borderRadius: 12,
-  background: "#111827",
-  color: "white",
-};
-
-const left = {
-  display: "flex",
-  alignItems: "center",
-  gap: 12,
-};
-
-const rank = {
-  fontSize: 18,
-  width: 30,
-};
-
-const name = {
-  fontSize: 16,
-};
-
-const time = {
-  opacity: 0.8,
 };
