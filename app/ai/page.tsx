@@ -6,21 +6,26 @@ export default function AI() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<string[]>([]);
 
-  const send = () => {
+  const send = async () => {
     if (!input) return;
 
-    setMessages([...messages, "あなた: " + input]);
-    setInput("");
+    setMessages((prev) => [...prev, "あなた: " + input]);
 
-    // 仮AI応答
-    setTimeout(() => {
-      setMessages((prev) => [...prev, "AI: まだ開発中だよ"]);
-    }, 500);
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: input }),
+    });
+
+    const data = await res.json();
+
+    setMessages((prev) => [...prev, "AI: " + data.reply]);
+    setInput("");
   };
 
   return (
-    <div>
-      <h1>AIアシスタント</h1>
+    <div style={{ padding: 20 }}>
+      <h1>AIチャット</h1>
 
       <div style={{ marginTop: 20 }}>
         {messages.map((m, i) => (
