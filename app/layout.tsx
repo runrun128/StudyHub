@@ -22,10 +22,11 @@ export default function RootLayout({
             <h2 style={{ fontSize: 18, marginBottom: 24 }}>📚 StudyHub</h2>
 
             <nav style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <Link href="/" style={link}>Home</Link>
-              <Link href="/study" style={link}>Study</Link>
-              <Link href="/rank" style={link}>Rank</Link>
-              <Link href="/ai" style={link}>AI</Link>
+              <Link href="/" style={link}>ホーム</Link>
+              <Link href="/study" style={link}>学習記録</Link>
+              <Link href="/rank" style={link}>ランキング</Link>
+              <Link href="/friends" style={link}>フレンド</Link>
+              <Link href="/ai" style={link}>AI(開発中)</Link>
             </nav>
           </aside>
 
