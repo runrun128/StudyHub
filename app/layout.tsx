@@ -1,5 +1,4 @@
 import Link from "next/link";
-import "./globals.css";
 
 export default function RootLayout({
   children,
@@ -8,24 +7,30 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body>
+      <body style={{ margin: 0, fontFamily: "sans-serif", background: "#0b1220", color: "white" }}>
         <div style={{ display: "flex", minHeight: "100vh" }}>
 
           {/* サイドバー */}
-          <aside style={{ width: 200, padding: 20, background: "#111" }}>
-            <p style={{ color: "white", marginBottom: 20 }}>StudyHub</p>
+          <aside
+            style={{
+              width: 240,
+              background: "#0f172a",
+              padding: 20,
+              borderRight: "1px solid #1f2937",
+            }}
+          >
+            <h2 style={{ fontSize: 18, marginBottom: 24 }}>📚 StudyHub</h2>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <Link href="/" style={{ color: "white" }}>ホーム</Link>
-              <Link href="/study" style={{ color: "white" }}>勉強</Link>
-              <Link href="/friends" style={{ color: "white" }}>フレンド</Link>
-              <Link href="/rank" style={{ color: "white" }}>ランキング</Link>
-              <Link href="/ai" style={{ color: "white" }}>AI</Link>
-            </div>
+            <nav style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <Link href="/" style={link}>Home</Link>
+              <Link href="/study" style={link}>Study</Link>
+              <Link href="/rank" style={link}>Rank</Link>
+              <Link href="/ai" style={link}>AI</Link>
+            </nav>
           </aside>
 
           {/* メイン */}
-          <main style={{ flex: 1, padding: 20 }}>
+          <main style={{ flex: 1, padding: 30 }}>
             {children}
           </main>
 
@@ -34,3 +39,10 @@ export default function RootLayout({
     </html>
   );
 }
+
+const link = {
+  color: "#cbd5e1",
+  textDecoration: "none",
+  padding: "6px 10px",
+  borderRadius: 6,
+};
