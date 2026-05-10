@@ -12,10 +12,13 @@ export default function FriendsPage() {
   // 初期ロード
   useEffect(() => {
     const load = async () => {
-      const { data: u } = await supabase.auth.getUser();
-      setUser(u.user);
+      const { data, error } = await supabase.auth.getUser();
 
-      fetchRequests(u.user.id);
+      if (error || !data?.user) return;
+
+      const user = data.user;
+      setUser(user);
+      fetchRequests(user.id);
     };
 
     load();
@@ -51,6 +54,7 @@ export default function FriendsPage() {
 
   // 申請送信
   const sendRequest = async (toUserId: string) => {
+    if (!user) return;
     await supabase.from("friend_requests").insert({
       from_user: user.id,
       to_user: toUserId,
@@ -62,6 +66,7 @@ export default function FriendsPage() {
 
   // 承認
   const acceptRequest = async (req: any) => {
+    if (!user) return;
     await supabase
       .from("friend_requests")
       .update({ status: "accepted" })
@@ -162,11 +167,11 @@ const row = {
   gap: 12,
 };
 
-const avatar = {
+const avatar: React.CSSProperties = {
   width: 40,
   height: 40,
   borderRadius: 6, // ← 正方形＋角丸
-  objectFit: "cover",
+  objectFit: "cover" as React.CSSProperties["objectFit"],
   background: "#1f2937",
 };
 
