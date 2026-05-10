@@ -27,6 +27,7 @@ export default function RootLayout({
               <Link href="/rank" style={link}>ランキング</Link>
               <Link href="/friends" style={link}>フレンド</Link>
               <Link href="/ai" style={link}>AI(開発中)</Link>
+              <Link href="/login" style={link}>ログイン・サインアップ</Link>
             </nav>
           </aside>
 
