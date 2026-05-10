@@ -20,6 +20,7 @@ export default function RootLayout({
               <Link href="/study" style={{ color: "white" }}>勉強</Link>
               <Link href="/friends" style={{ color: "white" }}>フレンド</Link>
               <Link href="/rank" style={{ color: "white" }}>ランキング</Link>
+              <Link href="/ai" style={{ color: "white" }}>AI</Link>
             </div>
           </aside>
 
